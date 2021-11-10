@@ -65,6 +65,46 @@ namespace Elsa.Persistence.EntityFramework.Core.Stores
             }
         }
 
+        public async Task SaveManyAsync(IEnumerable<T> entities, CancellationToken cancellationToken)
+        {
+            await _semaphore.WaitAsync(cancellationToken);
+
+            try
+            { 
+                await DoWork(async dbContext =>
+                {
+                    var dbSet = dbContext.Set<T>();
+
+                    foreach (var entity in entities)
+                    {
+                        var existingEntity = await dbSet.FindAsync(new object[] { entity.Id }, cancellationToken);
+
+                        if (existingEntity == null)
+                        {
+                            await dbSet.AddAsync(entity, cancellationToken);
+                            existingEntity = entity;
+
+                            OnSaving(dbContext, existingEntity);
+                        }
+                        else
+                        {
+                            await UpdateAsync(entity);
+                        }
+                    
+                    }
+                }, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                var a = ex.Message;
+                throw;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
 
         public async Task AddAsync(T entity, CancellationToken cancellationToken)
         {

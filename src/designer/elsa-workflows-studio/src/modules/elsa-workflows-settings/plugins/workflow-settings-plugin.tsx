@@ -7,15 +7,41 @@ import {
   ConfigureWorkflowRegistryUpdatingContext,
   ElsaStudio
 } from "../../../models";
+import {cloneDeep} from 'lodash';
+
+import { WorkflowSettingsRenderProps } from '../../../components/screens/workflow-definition-editor/elsa-workflow-settings-modal/elsa-workflow-settings-modal';
+import { WorkflowSettings } from '../models';
 
 export class WorkflowSettingsPlugin implements ElsaPlugin {
-  serverUrl: string;
+  serverUrl: string = 'https://localhost:11000';
 
   constructor(elsaStudio: ElsaStudio) {
     this.serverUrl = elsaStudio.serverUrl;
 
     eventBus.on(EventTypes.WorkflowRegistryLoadingColumns, this.onLoadingColumns);
     eventBus.on(EventTypes.WorkflowRegistryUpdating, this.onUpdating);
+    eventBus.on(EventTypes.WorkflowSettingsUpdaing, this.onSettingsUpdating);
+    eventBus.on(EventTypes.WorkflowSettingsBulkDelete, this.onBulkDelete);
+    eventBus.on(EventTypes.WorkflowSettingsModalLoaded, this.onModalLoaded);
+  }
+
+  onModalLoaded(renderProps: WorkflowSettingsRenderProps) {
+    const tabs = renderProps.tabs;
+
+    const renderPropertiesTab = () => {
+      return ( <elsa-workflow-definition-properties-tab properties={renderProps.properties}
+                  workflowDefinitionId={renderProps.workflowDefinition.definitionId}  
+                  onPropertiesToRemoveChanged={(e) => renderProps.propertiesToRemove = e.detail} 
+                  onPropertiesChanged={(e) => renderProps.workflowDefinition.settings = e.detail}
+                  onFormValidationChanged={e => { 
+                    eventBus.emit(EventTypes.WorkflowPropertiesValidationChanged, this, e.detail);
+                  }}/> )
+    }
+
+    tabs.push({
+      tabName: 'Properties',
+      renderContent: renderPropertiesTab
+    })
   }
 
   onLoadingColumns(context: ConfigureWorkflowRegistryColumnsContext) {
@@ -42,5 +68,26 @@ export class WorkflowSettingsPlugin implements ElsaPlugin {
 
     await elsaClient.workflowSettingsApi.save(request);
     await eventBus.emit(EventTypes.WorkflowRegistryUpdated, this);
+  }
+
+  async onSettingsUpdating(settings: WorkflowSettings[]) {
+    if(!settings) {
+      return;
+    }
+    
+    const elsaClient = await createElsaWorkflowSettingsClient(this.serverUrl);
+
+    await elsaClient.workflowSettingsApi.saveAll(settings);
+  }
+
+  async onBulkDelete(ids: Array<string>) {
+    if(!ids || !ids.length) {
+      return;
+    }
+
+    const elsaClient = await createElsaWorkflowSettingsClient(this.serverUrl);
+    await elsaClient.workflowSettingsApi.bulkDelete(ids);
+
+    eventBus.emit(EventTypes.WorkflowSettingsDeleted, this);
   }
 }

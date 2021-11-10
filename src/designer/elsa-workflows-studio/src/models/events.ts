@@ -38,10 +38,16 @@ export const EventTypes = {
   ClipboardPermissionDenied: 'clipboard-permission-denied',
   ClipboardCopied: 'clipboard-copied',
   PasteActivity: 'paste-activity',
+  WorkflowSettingsModalLoaded: 'workflow-settings-modal-loaded',
   TestActivityMessageReceived: 'test-activity-message-received',
   FlyoutPanelTabSelected: 'flyout-panel-tab-selected',
   ComponentLoadingCustomButton: 'component-loading-custom-button',
-  ComponentCustomButtonClick: 'component-custom-button-click'
+  ComponentCustomButtonClick: 'component-custom-button-click',
+  WorkflowSettingsUpdaing: 'workflow-settings-updating',
+  WorkflowSettingsBulkDelete: 'workflow-settings-delete',
+  WorkflowSettingsDeleted: 'workflow-settings-deleted',
+  WorkflowPropertiesValidationChanged: 'workflow-properties-validation-changed',
+  WorkflowSettingsClosing: 'workflow-settings-closing'
 };
 
 export interface AddActivityEventArgs {

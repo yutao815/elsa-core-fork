@@ -1,4 +1,6 @@
-﻿import {Map} from '../utils/utils';
+﻿
+import { WorkflowSettings } from '../modules/elsa-workflows-settings/models';
+import {Map} from '../utils/utils';
 
 export interface WorkflowDefinition {
   id?: string;
@@ -20,6 +22,7 @@ export interface WorkflowDefinition {
   connections: Array<ConnectionDefinition>;
   tag?: string;
   channel?: string;
+  settings?: WorkflowSettings[];
 }
 
 export interface WorkflowDefinitionSummary {
