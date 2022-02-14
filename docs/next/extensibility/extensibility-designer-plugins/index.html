@@ -259,6 +259,7 @@ To use a different UI hint, specify the <code>UIHint</code> property explicitly.
         <span class="hljs-comment">// Initialize the property editor.</span>
         propertyEditor.propertyDescriptor = propertyDescriptor;
         propertyEditor.propertyModel = propertyModel;
+        propertyEditor.activityModel = activity;
 
         <span class="hljs-comment">// Setup change handler for custom control that updates the property model.</span>
         inputElement.addEventListener(<span class="hljs-string">'change'</span>, (e) =&gt; {
