@@ -1,8 +1,10 @@
 import 'reflect-metadata';
 import {camelCase} from 'lodash';
+import {v4 as uuid} from 'uuid';
 import {Service} from "typedi"
 import {TransposeContext, TransposeHandler, UntransposeContext, UntransposedConnection} from "./transpose-handler";
 import {Activity, Port} from "../../../models";
+import {Flowchart} from "./models";
 
 @Service()
 export class DefaultTransposeHandler implements TransposeHandler {
@@ -11,12 +13,9 @@ export class DefaultTransposeHandler implements TransposeHandler {
     const {connection, source, target, sourceDescriptor} = context;
     const matchingTargetPort = sourceDescriptor.outPorts.find(x => x.name == connection.sourcePort);
 
+    // There is no matching port, so no transposing necessary.
     if (!matchingTargetPort)
       return false;
-
-    // Assign the target activity directly to the outbound port of the source activity.
-    const outPortPropName = camelCase(connection.sourcePort);
-    source[outPortPropName] = target;
 
     return true;
   }

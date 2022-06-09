@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import {Component, Element, Event, EventEmitter, h, Method, Prop, Watch} from '@stencil/core';
 import {Edge, Graph, Model, Node, NodeView, Point} from '@antv/x6';
+import {camelCase} from 'lodash';
 import {v4 as uuid} from 'uuid';
 import {first} from 'lodash';
 import './shapes';
@@ -179,41 +180,81 @@ export class FlowchartComponent implements ContainerActivityComponent {
     let remainingActivities: Array<Activity> = [...activities]; // The activities remaining after transposition.
     const activityDescriptors = descriptorsStore.activityDescriptors;
     const transposeHandlerRegistry = Container.get(TransposeHandlerRegistry);
-
-    // Transpose connections to activity outbound port properties.
-    for (const connection of connections) {
-      const source = activities.find(x => x.id == connection.source);
-      const target = activities.find(x => x.id == connection.target);
-      const sourceDescriptor = activityDescriptors.find(x => x.activityType == source.typeName);
-      const targetDescriptor = activityDescriptors.find(x => x.activityType == target.typeName);
-      const transposeHandler = transposeHandlerRegistry.get(source.typeName);
-
-      if (transposeHandler.transpose({source, target, connection, sourceDescriptor, targetDescriptor})) {
-        // Remove the target activity from the list.
-        remainingActivities = remainingActivities.filter(x => x != target);
-      } else {
-        // Keep this connection.
-        remainingConnections.push(connection);
-      }
-    }
+    const subFlows: Array<Flowchart> = [];
 
     let rootActivities = activities.filter(activity => {
       const hasInboundConnections = connections.find(c => c.target == activity.id) != null;
       return !hasInboundConnections;
     });
 
-    const rootActivity = rootActivities.find(x => x.canStartWorkflow) || first(rootActivities);
+    const rootActivity: Activity = rootActivities.find(x => x.canStartWorkflow) || first(rootActivities);
 
-    return {
+    const rootFlow: Flowchart = {
       typeName: 'Elsa.Flowchart',
-      activities: remainingActivities,
-      connections: remainingConnections,
+      activities: [],
+      connections: [],
       id: this.rootId,
       start: rootActivity?.id,
       metadata: {},
       applicationProperties: {},
       variables: []
-    } as Flowchart;
+    };
+
+    subFlows.push(rootFlow);
+
+    debugger;
+
+    // Find all children of the current parent.
+    const currentFlowScope = rootFlow;
+    const currentParent = rootActivity;
+    const currentConnections = connections.filter(x => x.source == currentParent.id);
+    //const currentChildren: Array<Activity> = activities.filter(activity => currentChildrenIds.find(x => activity.id == x));
+
+    // For each child, keep a connection to its parent within the current flowchart scope, or transpose it into the parents out port.
+    for (const connection of currentConnections) {
+      const transposeHandler = transposeHandlerRegistry.get(currentParent.typeName);
+      const source = currentParent;
+      const target = activities.find(x => x.id == connection.target);
+      const sourceDescriptor = activityDescriptors.find(x => x.activityType == source.typeName);
+      const targetDescriptor = activityDescriptors.find(x => x.activityType == target.typeName);
+      const transpose = transposeHandler.transpose({source, target, connection, sourceDescriptor, targetDescriptor});
+
+      if (transpose) {
+
+        const subFlow: Flowchart = {
+          id: uuid(),
+          start: target.id,
+          connections: [],
+          variables: [],
+          activities: [target],
+          typeName: 'Elsa.Flowchart',
+          metadata: {},
+          applicationProperties: {}
+        };
+
+        // There is a matching source port for the connection.
+        // Create a new flowchart activity to capture the subgraph and assign it to the source port.
+        const outPortPropName = camelCase(connection.sourcePort);
+        source[outPortPropName] = subFlow;
+
+        // Remove the target activity from the list.
+        remainingActivities = remainingActivities.filter(x => x != target);
+        subFlows.push(subFlow);
+      } else {
+        const subFlow: Flowchart = subFlows.find(x => x.start == source.id || !!x.connections.find(c => c.target == source.id || c.source == source.id)) ?? rootFlow;
+        subFlow.connections.push(connection);
+
+        if (!subFlow.activities.find(x => x.id == connection.source))
+          subFlow.activities.push(source);
+
+        if (!subFlow.activities.find(x => x.id == connection.target))
+          subFlow.activities.push(target);
+      }
+    }
+
+    //rootFlow.activities = remainingActivities;
+
+    return rootFlow;
   }
 
   private importRootInternal = async (root: Activity) => {

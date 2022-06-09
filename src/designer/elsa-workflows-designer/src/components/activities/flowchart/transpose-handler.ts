@@ -1,4 +1,4 @@
-import {Connection} from "./models";
+import {Connection, Flowchart} from "./models";
 import {Activity, ActivityDescriptor} from "../../../models";
 import {ActivityNode} from "./activity-walker";
 
@@ -8,11 +8,11 @@ export interface TransposeHandler {
 }
 
 export interface TransposeContext {
-    connection: Connection;
-    source: Activity;
-    target: Activity;
-    sourceDescriptor: ActivityDescriptor;
-    targetDescriptor: ActivityDescriptor;
+  connection: Connection;
+  source: Activity;
+  target: Activity;
+  sourceDescriptor: ActivityDescriptor;
+  targetDescriptor: ActivityDescriptor;
 }
 
 export interface UntransposeContext {

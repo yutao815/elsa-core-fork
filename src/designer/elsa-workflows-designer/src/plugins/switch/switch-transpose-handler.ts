@@ -1,7 +1,10 @@
 import 'reflect-metadata';
+import {camelCase} from 'lodash';
 import {Service} from "typedi"
+import {v4 as uuid} from 'uuid';
 import {TransposeContext, TransposeHandler, UntransposeContext, UntransposedConnection} from "../../components/activities/flowchart/transpose-handler";
 import {SwitchActivity} from "./models";
+import {Flowchart} from "../../components/activities/flowchart/models";
 
 @Service()
 export class SwitchTransposeHandler implements TransposeHandler {
@@ -17,7 +20,6 @@ export class SwitchTransposeHandler implements TransposeHandler {
 
     // Assign the target activity directly to the switch case.
     matchingCase.activity = target;
-
     return true;
   }
 
