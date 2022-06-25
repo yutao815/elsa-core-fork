@@ -26,6 +26,7 @@ public class VariableDefinitionMapper
         var variableGenericType = typeof(Variable<>).MakeGenericType(type);
         var variable = (Variable)Activator.CreateInstance(variableGenericType)!;
 
+        variable.Id = source.Id;
         variable.Name = source.Name;
         variable.Value = source.Value.ConvertTo(type);
         variable.StorageDriverId = source.StorageDriverId;
@@ -50,7 +51,7 @@ public class VariableDefinitionMapper
 
         var serializedValue = value.Format();
 
-        return new VariableDefinition(source.Name, valueTypeAlias, serializedValue, driverId);
+        return new VariableDefinition( source.Id, source.Name, valueTypeAlias, serializedValue, driverId);
     }
 
     public IEnumerable<VariableDefinition> Map(IEnumerable<Variable>? source) => source?.Select(Map) ?? Enumerable.Empty<VariableDefinition>();

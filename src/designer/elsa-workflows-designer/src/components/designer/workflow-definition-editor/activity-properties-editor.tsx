@@ -202,12 +202,11 @@ export class ActivityPropertiesEditor {
     const propertyName = outputDescriptor.name;
     const activityDescriptor = this.findActivityDescriptor();
     const camelCasePropertyName = camelCase(propertyName);
+    const variable = this.variables.find(x => x.name == variableName);
 
     const property: ActivityOutput = {
       type: outputDescriptor.type,
-      memoryReference: {
-        id: variableName
-      }
+      memoryReference: variable
     }
 
     activity[camelCasePropertyName] = property;

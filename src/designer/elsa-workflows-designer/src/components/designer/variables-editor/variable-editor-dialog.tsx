@@ -25,7 +25,7 @@ export class VariableEditorDialog {
   }
 
   render() {
-    const variable: Variable = this.variable ?? {name: '', type: 'Object'};
+    const variable: Variable = this.variable ?? {id: '', name: '', type: 'Object'};
     const variableType = variable.type;
     const cancelAction = DefaultActions.Cancel();
     const saveAction = DefaultActions.Save();
@@ -40,7 +40,6 @@ export class VariableEditorDialog {
             <div class="pt-4">
               <h2 class="text-lg font-medium ml-4 mb-2">Edit Variable</h2>
               <div class="align-middle inline-block min-w-full border-b border-gray-200">
-
 
                 <FormEntry fieldId="variableName" label="Name" hint="The technical name of the variable.">
                   <input type="text" name="variableName" id="variableName" value={variable.name}/>
@@ -84,6 +83,7 @@ export class VariableEditorDialog {
     const driverId = formData.get('variableStorageDriverId') as string;
     const variable = this.variable;
 
+    variable.id = name;
     variable.name = name;
     variable.type = type;
     variable.value = value;

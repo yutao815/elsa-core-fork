@@ -29,12 +29,17 @@ public class OutputJsonConverter<T> : JsonConverter<Output<T>?>
         if (!doc.RootElement.TryGetProperty("type", out var outputTargetTypeElement))
             return null;
 
-        var memoryReferenceElement = doc.RootElement.GetProperty("memoryReference");
+        if (!doc.RootElement.TryGetProperty("memoryReference", out var memoryReferenceElement))
+            return default;
 
         if (!memoryReferenceElement.TryGetProperty("id", out var memoryReferenceIdElement))
             return default;
 
         var variable = new Variable(memoryReferenceIdElement.GetString()!);
+
+        if (memoryReferenceElement.TryGetProperty("storageDriverId", out var storageDriverIdElement)) 
+            variable.StorageDriverId = storageDriverIdElement.GetString();
+
         return (Output<T>)Activator.CreateInstance(typeof(Output<T>), variable)!;
     }
 
@@ -42,14 +47,18 @@ public class OutputJsonConverter<T> : JsonConverter<Output<T>?>
     {
         var valueType = typeof(T);
         var valueTypeAlias = _wellKnownTypeRegistry.GetAliasOrDefault(valueType);
+        var variable = value?.MemoryBlockReference as Variable;
 
         var model = new
         {
             Type = valueTypeAlias,
-            MemoryReference = value == null ? null : new
-            {
-                Id = value.MemoryBlockReference.Id
-            }
+            MemoryReference = variable == null
+                ? null
+                : new
+                {
+                    Id = variable.Id,
+                    StorageDriverId = variable.StorageDriverId
+                }
         };
 
         JsonSerializer.Serialize(writer, model, options);

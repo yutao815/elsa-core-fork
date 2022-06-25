@@ -94,7 +94,12 @@ export class VariablesEditor {
 
   private onAddVariableClick = async () => {
     const newVariableName = this.generateNewVariableName();
-    this.variableEditorDialog.variable = {name: newVariableName, type: 'Object', value: null};
+    this.variableEditorDialog.variable = {
+      id: newVariableName,
+      name: newVariableName,
+      type: 'Object',
+      value: null
+    };
     await this.variableEditorDialog.show();
   };
 

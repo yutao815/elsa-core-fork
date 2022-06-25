@@ -26,7 +26,7 @@ export interface Container extends Activity {
   variables: Array<Variable>;
 }
 
-export interface Variable {
+export interface Variable extends MemoryReference {
   name: string;
   type: string;
   value?: any;
