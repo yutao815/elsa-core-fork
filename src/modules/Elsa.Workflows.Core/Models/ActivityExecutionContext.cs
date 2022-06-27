@@ -1,5 +1,5 @@
 using System.Collections.ObjectModel;
-using Elsa.Expressions.Helpers;
+using System.Text.Json;
 using Elsa.Expressions.Models;
 using Elsa.Workflows.Core.Services;
 
@@ -162,7 +162,8 @@ public class ActivityExecutionContext
     public T? Get<T>(MemoryBlockReference blockReference)
     {
         var value = Get(blockReference);
-        return value != default ? value.ConvertTo<T>() : default;
+        var convertedValue = JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value));
+        return value != default ? convertedValue : default;
     }
 
     public void Set(MemoryBlockReference blockReference, object? value) => ExpressionExecutionContext.Set(blockReference, value);

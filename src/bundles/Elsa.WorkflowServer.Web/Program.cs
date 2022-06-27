@@ -1,5 +1,3 @@
-using Elsa.AspNetCore;
-using Elsa.AspNetCore.Conventions;
 using Elsa.AspNetCore.Extensions;
 using Elsa.Extensions;
 using Elsa.Hangfire.Implementations;
@@ -40,6 +38,7 @@ services
             .AddActivity<ReadLine>()
             .AddActivity<If>()
             .AddActivity<HttpEndpoint>()
+            .AddActivity<SendHttpRequest>()
             .AddActivity<Flowchart>()
             .AddActivity<Elsa.Scheduling.Activities.Delay>()
             .AddActivity<Elsa.Scheduling.Activities.Timer>()
