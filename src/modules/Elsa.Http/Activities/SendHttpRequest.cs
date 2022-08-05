@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Elsa.Http.Models;
@@ -51,14 +50,14 @@ public class SendHttpRequest : Activity
         UIHint = InputUIHints.Checkbox
     )]
     public Input<bool> ReadContent { get; set; } = new(false);
-        
-    public Input<HttpRequestHeaders?> RequestHeaders { get; set; } = new(new HttpRequestHeaders());
     
+    public Input<HttpRequestHeaders?> RequestHeaders { get; set; } = new(new HttpRequestHeaders());
+
     [Input(
-        //OptionsProvider = typeof(SendHttpRequest),
+        Options = new[] { "", "Expando Object", "File", "JsonElement", "JSON", "Plain Text" },
         UIHint = InputUIHints.Dropdown
     )]
-    public Input<string?> ResponseContentParserName { get; set; }
+    public Input<string?> ResponseContentParserName { get; set; } = default!;
     
     [Output]
     public Output<object>? ResponseContent { get; set; }

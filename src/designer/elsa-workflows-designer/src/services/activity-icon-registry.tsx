@@ -14,6 +14,7 @@ import {
   TimerIcon,
   WriteLineIcon
 } from "../components/icons/activities";
+import {SendHttpRequestIcon} from "../components/icons/activities/send-http-request";
 
 export type ActivityType = string;
 export type ActivityIcon = (ActivityIconSettings?) => any;
@@ -33,7 +34,8 @@ export class ActivityIconRegistry {
     this.add('Elsa.Delay', settings => <DelayIcon size={settings?.size}/>);
     this.add('Elsa.Timer', settings => <TimerIcon size={settings?.size}/>);
     this.add('Elsa.Event', settings => <EventIcon size={settings?.size}/>);
-    this.add('Elsa.RunJavaScript', settings => <RunJavaScriptIcon size={settings?.size}/>);
+    this.add('Elsa.RunJavaScript', settings => <RunJavaScriptIcon size={settings?.size}/>)
+    this.add('Elsa.SendHttpRequest', settings => <SendHttpRequestIcon size={settings?.size}/>);
   }
 
   public add(activityType: ActivityType, icon: ActivityIcon) {

@@ -9,7 +9,7 @@ namespace Elsa.Http.Parsers.Response;
 
 public class JsonElementHttpResponseContentReader : IHttpResponseContentReader
 {
-    public string Name => "JToken";
+    public string Name => "JsonElement";
     public int Priority => 0;
     public bool GetSupportsContentType(string contentType) => contentType.Contains("/json", StringComparison.OrdinalIgnoreCase);
     public async Task<object> ReadAsync(HttpResponseMessage response, object context, CancellationToken cancellationToken)
