@@ -33,7 +33,7 @@
     // Integration demos.
 
     // Import publicly exposed services and models.
-    import {confirmDialogService, EventTypes, WebhooksPlugin, CredentialManagerPlugin, WorkflowSettingsPlugin} from "/build/index.esm.js";
+    import {confirmDialogService, EventTypes, WebhooksPlugin, CredentialManagerPlugin, WorkflowSettingsPlugin, Auth0Plugin} from "/build/index.esm.js";
 
     function accessTokenFactory() {
       return  (Math.random() + 1).toString(36).substring(7);
@@ -335,6 +335,13 @@
         WorkflowSettingsPlugin,
         CustomHubConnectionPlugin
       ]);
+
+      // Uncomment below to register the Auth0 plugin.
+      // elsa.pluginManager.registerPluginFactory(() => new Auth0Plugin({
+      //   client_id: null, // TODO: enter client ID.
+      //   domain: null, // TODO: enter domain.
+      //   audience: null, // TODO: enter audience.
+      // }));
     });
 
     // Some components publish DOM events that we can handle directly:
