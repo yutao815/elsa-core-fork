@@ -5,7 +5,8 @@ import {ActivityUpdatedArgs} from "../workflow-definitions/components/activity-p
 import {Flowchart} from "./models";
 
 @Component({
-  tag: 'elsa-flowchart-editor'
+  tag: 'elsa-flowchart-editor',
+  styleUrl: 'flowchart-editor'
 })
 export class FlowchartEditor {
   private container: HTMLDivElement;
@@ -26,8 +27,8 @@ export class FlowchartEditor {
   }
 
   render() {
-    return <div>
-      <div class="absolute inset-0" ref={el => this.container = el}>
+    return <div class="flowchart-editor-root absolute inset-0">
+      <div class="" ref={el => this.container = el}>
         <elsa-flowchart-editor-toolbar zoomToFit={this.onZoomToFit} autoLayout={this.onAutoLayout}/>
         <elsa-panel
           class="elsa-activity-picker-container z-30"
@@ -35,10 +36,11 @@ export class FlowchartEditor {
           onExpandedStateChanged={e => this.onActivityPickerPanelStateChanged(e.detail)}>
           <elsa-workflow-definition-editor-toolbox ref={el => this.toolbox = el}/>
         </elsa-panel>
-        <div class="absolute left-0 top-0 right-0 bottom-0">
+        <div>
           <elsa-flowchart
             ref={el => this.flowchart = el}
-            interactiveMode={true} class="absolute left-0 top-0 right-0 bottom-0"
+            interactiveMode={true}
+            class="absolute left-0 top-0 right-0 bottom-0"
             onDragOver={this.onDragOver}
             onDrop={this.onDrop}/>
         </div>

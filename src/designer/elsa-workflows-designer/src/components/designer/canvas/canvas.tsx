@@ -22,8 +22,7 @@ export interface RenameActivityArgs {
 }
 
 @Component({
-  tag: 'elsa-canvas',
-  styleUrl: 'canvas.scss',
+  tag: 'elsa-canvas'
 })
 export class Canvas {
 
