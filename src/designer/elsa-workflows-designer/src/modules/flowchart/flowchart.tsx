@@ -259,7 +259,7 @@ export class FlowchartComponent implements ContainerActivityComponent {
   @Method()
   async import(root: Activity): Promise<void> {
     await this.importInternal(root);
-    
+
     rebuildGraph(this.graph);
 
     await this.scrollToStart();

@@ -63,6 +63,8 @@ export namespace Components {
     interface ElsaActivityPublishButton {
         "publishing": boolean;
     }
+    interface ElsaBpmnDiagram {
+    }
     interface ElsaButtonGroup {
         "buttons": Array<Button>;
     }
@@ -134,6 +136,15 @@ export namespace Components {
         "updateActivity": (args: UpdateActivityArgs) => Promise<void>;
         "updateLayout": () => Promise<void>;
         "workflowDefinition": WorkflowDefinition;
+        "zoomToFit": () => Promise<void>;
+    }
+    interface ElsaFlowchartEditor {
+        "export": () => Promise<Activity>;
+        "monacoLibPath": string;
+        "newRoot": () => Promise<Activity>;
+    }
+    interface ElsaFlowchartEditorToolbar {
+        "autoLayout": (direction: "TB" | "BT" | "LR" | "RL") => Promise<void>;
         "zoomToFit": () => Promise<void>;
     }
     interface ElsaFormPanel {
@@ -256,7 +267,6 @@ export namespace Components {
     interface ElsaWorkflowDefinitionBrowser {
     }
     interface ElsaWorkflowDefinitionEditor {
-        "getCanvas": () => Promise<HTMLElsaCanvasElement>;
         "getWorkflowDefinition": () => Promise<WorkflowDefinition>;
         "importWorkflow": (workflowDefinition: WorkflowDefinition) => Promise<void>;
         "loadWorkflowVersions": () => Promise<void>;
@@ -358,6 +368,12 @@ declare global {
         prototype: HTMLElsaActivityPublishButtonElement;
         new (): HTMLElsaActivityPublishButtonElement;
     };
+    interface HTMLElsaBpmnDiagramElement extends Components.ElsaBpmnDiagram, HTMLStencilElement {
+    }
+    var HTMLElsaBpmnDiagramElement: {
+        prototype: HTMLElsaBpmnDiagramElement;
+        new (): HTMLElsaBpmnDiagramElement;
+    };
     interface HTMLElsaButtonGroupElement extends Components.ElsaButtonGroup, HTMLStencilElement {
     }
     var HTMLElsaButtonGroupElement: {
@@ -429,6 +445,18 @@ declare global {
     var HTMLElsaFlowchartElement: {
         prototype: HTMLElsaFlowchartElement;
         new (): HTMLElsaFlowchartElement;
+    };
+    interface HTMLElsaFlowchartEditorElement extends Components.ElsaFlowchartEditor, HTMLStencilElement {
+    }
+    var HTMLElsaFlowchartEditorElement: {
+        prototype: HTMLElsaFlowchartEditorElement;
+        new (): HTMLElsaFlowchartEditorElement;
+    };
+    interface HTMLElsaFlowchartEditorToolbarElement extends Components.ElsaFlowchartEditorToolbar, HTMLStencilElement {
+    }
+    var HTMLElsaFlowchartEditorToolbarElement: {
+        prototype: HTMLElsaFlowchartEditorToolbarElement;
+        new (): HTMLElsaFlowchartEditorToolbarElement;
     };
     interface HTMLElsaFormPanelElement extends Components.ElsaFormPanel, HTMLStencilElement {
     }
@@ -677,6 +705,7 @@ declare global {
         "elsa-activity-properties": HTMLElsaActivityPropertiesElement;
         "elsa-activity-properties-editor": HTMLElsaActivityPropertiesEditorElement;
         "elsa-activity-publish-button": HTMLElsaActivityPublishButtonElement;
+        "elsa-bpmn-diagram": HTMLElsaBpmnDiagramElement;
         "elsa-button-group": HTMLElsaButtonGroupElement;
         "elsa-canvas": HTMLElsaCanvasElement;
         "elsa-check-list-input": HTMLElsaCheckListInputElement;
@@ -689,6 +718,8 @@ declare global {
         "elsa-dropdown-input": HTMLElsaDropdownInputElement;
         "elsa-flow-switch-editor": HTMLElsaFlowSwitchEditorElement;
         "elsa-flowchart": HTMLElsaFlowchartElement;
+        "elsa-flowchart-editor": HTMLElsaFlowchartEditorElement;
+        "elsa-flowchart-editor-toolbar": HTMLElsaFlowchartEditorToolbarElement;
         "elsa-form-panel": HTMLElsaFormPanelElement;
         "elsa-home-page": HTMLElsaHomePageElement;
         "elsa-input-control-switch": HTMLElsaInputControlSwitchElement;
@@ -762,6 +793,8 @@ declare namespace LocalJSX {
         "onUnPublishClicked"?: (event: CustomEvent<any>) => void;
         "publishing"?: boolean;
     }
+    interface ElsaBpmnDiagram {
+    }
     interface ElsaButtonGroup {
         "buttons"?: Array<Button>;
     }
@@ -814,6 +847,13 @@ declare namespace LocalJSX {
         "onContainerSelected"?: (event: CustomEvent<ContainerSelectedArgs>) => void;
         "onGraphUpdated"?: (event: CustomEvent<GraphUpdatedArgs>) => void;
         "workflowDefinition"?: WorkflowDefinition;
+    }
+    interface ElsaFlowchartEditor {
+        "monacoLibPath"?: string;
+    }
+    interface ElsaFlowchartEditorToolbar {
+        "autoLayout"?: (direction: "TB" | "BT" | "LR" | "RL") => Promise<void>;
+        "zoomToFit"?: () => Promise<void>;
     }
     interface ElsaFormPanel {
         "actions"?: Array<PanelActionDefinition>;
@@ -1020,6 +1060,7 @@ declare namespace LocalJSX {
         "elsa-activity-properties": ElsaActivityProperties;
         "elsa-activity-properties-editor": ElsaActivityPropertiesEditor;
         "elsa-activity-publish-button": ElsaActivityPublishButton;
+        "elsa-bpmn-diagram": ElsaBpmnDiagram;
         "elsa-button-group": ElsaButtonGroup;
         "elsa-canvas": ElsaCanvas;
         "elsa-check-list-input": ElsaCheckListInput;
@@ -1032,6 +1073,8 @@ declare namespace LocalJSX {
         "elsa-dropdown-input": ElsaDropdownInput;
         "elsa-flow-switch-editor": ElsaFlowSwitchEditor;
         "elsa-flowchart": ElsaFlowchart;
+        "elsa-flowchart-editor": ElsaFlowchartEditor;
+        "elsa-flowchart-editor-toolbar": ElsaFlowchartEditorToolbar;
         "elsa-form-panel": ElsaFormPanel;
         "elsa-home-page": ElsaHomePage;
         "elsa-input-control-switch": ElsaInputControlSwitch;
@@ -1084,6 +1127,7 @@ declare module "@stencil/core" {
             "elsa-activity-properties": LocalJSX.ElsaActivityProperties & JSXBase.HTMLAttributes<HTMLElsaActivityPropertiesElement>;
             "elsa-activity-properties-editor": LocalJSX.ElsaActivityPropertiesEditor & JSXBase.HTMLAttributes<HTMLElsaActivityPropertiesEditorElement>;
             "elsa-activity-publish-button": LocalJSX.ElsaActivityPublishButton & JSXBase.HTMLAttributes<HTMLElsaActivityPublishButtonElement>;
+            "elsa-bpmn-diagram": LocalJSX.ElsaBpmnDiagram & JSXBase.HTMLAttributes<HTMLElsaBpmnDiagramElement>;
             "elsa-button-group": LocalJSX.ElsaButtonGroup & JSXBase.HTMLAttributes<HTMLElsaButtonGroupElement>;
             "elsa-canvas": LocalJSX.ElsaCanvas & JSXBase.HTMLAttributes<HTMLElsaCanvasElement>;
             "elsa-check-list-input": LocalJSX.ElsaCheckListInput & JSXBase.HTMLAttributes<HTMLElsaCheckListInputElement>;
@@ -1096,6 +1140,8 @@ declare module "@stencil/core" {
             "elsa-dropdown-input": LocalJSX.ElsaDropdownInput & JSXBase.HTMLAttributes<HTMLElsaDropdownInputElement>;
             "elsa-flow-switch-editor": LocalJSX.ElsaFlowSwitchEditor & JSXBase.HTMLAttributes<HTMLElsaFlowSwitchEditorElement>;
             "elsa-flowchart": LocalJSX.ElsaFlowchart & JSXBase.HTMLAttributes<HTMLElsaFlowchartElement>;
+            "elsa-flowchart-editor": LocalJSX.ElsaFlowchartEditor & JSXBase.HTMLAttributes<HTMLElsaFlowchartEditorElement>;
+            "elsa-flowchart-editor-toolbar": LocalJSX.ElsaFlowchartEditorToolbar & JSXBase.HTMLAttributes<HTMLElsaFlowchartEditorToolbarElement>;
             "elsa-form-panel": LocalJSX.ElsaFormPanel & JSXBase.HTMLAttributes<HTMLElsaFormPanelElement>;
             "elsa-home-page": LocalJSX.ElsaHomePage & JSXBase.HTMLAttributes<HTMLElsaHomePageElement>;
             "elsa-input-control-switch": LocalJSX.ElsaInputControlSwitch & JSXBase.HTMLAttributes<HTMLElsaInputControlSwitchElement>;
