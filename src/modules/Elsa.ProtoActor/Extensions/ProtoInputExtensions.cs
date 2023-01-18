@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using Elsa.Common.JsonConverters;
 using Elsa.ProtoActor.Protos;
 
 namespace Elsa.ProtoActor.Extensions;
@@ -9,6 +11,13 @@ internal static class ProtoInputExtensions
 
     public static Input Serialize(this IDictionary<string, object> input)
     {
+        var jsonOptions = new JsonSerializerOptions
+        {
+            ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            
+        };
+        jsonOptions.Converters.Add(new TypeConverter());
+
         var result = new Input();
         var data = result.Data;
 
@@ -16,7 +25,7 @@ internal static class ProtoInputExtensions
         {
             data[key] = new Json
             {
-                Text = JsonSerializer.Serialize(value)
+                Text = JsonSerializer.Serialize(value, jsonOptions)
             };
         }
 
