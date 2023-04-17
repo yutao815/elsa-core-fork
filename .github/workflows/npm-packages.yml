@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - v3
+      - version-test
     paths:
       - src/designer/**
       - .github/**
@@ -166,6 +167,7 @@ jobs:
     name: Update Version in Elsa.Workflows.Designer backend module
     needs: publish_npm_preview
     runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/v3' }}
     steps:
       - name: Install jq
         run: sudo apt-get install jq
@@ -184,6 +186,3 @@ jobs:
           git fetch --all
           git config user.name "GitHub Action"
           git checkout v3
-          git add package.json
-          git commit -m "Updated designer version to $ELSA_VERSION-preview.${{ github.run_number }}"
-          git push origin v3
