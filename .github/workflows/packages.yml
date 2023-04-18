@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - v3
+      - version-test
 env:
   nuget_feed_source: 'https://f.feedz.io/elsa-workflows/elsa-3/nuget/index.json'
   
