@@ -147,7 +147,8 @@ public class ActivityJsonConverter : JsonConverter<IActivity>
         newOptions.Converters.Add(new OutputJsonConverterFactory(_serviceProvider));
 
         // Write to a JsonObject so that we can add additional information.
-        var activityModel = JsonSerializer.SerializeToNode(value, value.GetType(), newOptions)!;
+        //var activityModel = JsonSerializer.SerializeToNode(value, value.GetType(), newOptions)!;
+        var activityModel = new JsonObject();
         var syntheticInputs = activityDescriptor.Inputs.Where(x => x.IsSynthetic).ToList();
         var syntheticOutputs = activityDescriptor.Outputs.Where(x => x.IsSynthetic).ToList();
         var inputsElement = new JsonObject();
