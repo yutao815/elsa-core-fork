@@ -250,7 +250,9 @@ export class Journal {
       root: workflowDefinition.root,
       variables: workflowDefinition.variables,
       metadata: {},
-      customProperties: {}
+      customProperties: {},
+      inputs: {},
+      outputs: {},
     }
 
     const graph = walkActivities(workflow);

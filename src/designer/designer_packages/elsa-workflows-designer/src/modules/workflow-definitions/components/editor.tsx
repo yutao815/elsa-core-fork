@@ -15,7 +15,7 @@ import {WorkflowDefinitionPropsUpdatedArgs, WorkflowDefinitionUpdatedArgs, Activ
 import {WorkflowDefinition} from "../models/entities";
 import {WorkflowDefinitionsApi} from "../services/api"
 import WorkflowDefinitionTunnel, {WorkflowDefinitionState} from "../state";
-import {LayoutDirection, UpdateActivityArgs} from "../../flowchart/models";
+import {Flowchart, LayoutDirection, UpdateActivityArgs} from "../../flowchart/models";
 import {cloneDeep} from '@antv/x6/lib/util/object/object';
 import {removeGuidsFromPortNames} from '../../../utils/graph';
 import {WorkflowPropertiesEditorTabs} from '../models/props-editor-tabs';
@@ -221,7 +221,7 @@ export class WorkflowDefinitionEditor {
     const existingWorkflowDefinition = await this.workflowDefinitionApi.get({definitionId: updatedWorkflowDefinition.definitionId, versionOptions: {version: updatedWorkflowDefinition.version}});
     const updatedWorkflowDefinitionClone = cloneDeep(updatedWorkflowDefinition);
 
-    removeGuidsFromPortNames(updatedWorkflowDefinitionClone.root);
+    removeGuidsFromPortNames(updatedWorkflowDefinitionClone.root as Flowchart);
 
     return !isEqual(existingWorkflowDefinition, updatedWorkflowDefinitionClone);
   }

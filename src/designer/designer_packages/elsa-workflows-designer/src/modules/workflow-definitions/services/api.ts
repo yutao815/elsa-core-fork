@@ -6,6 +6,7 @@ import {AxiosResponse} from "axios";
 import {removeGuidsFromPortNames, addGuidsToPortNames} from '../../../utils/graph';
 import {cloneDeep} from '@antv/x6/lib/util/object/object';
 import {ElsaClientProvider} from "../../../services";
+import {Flowchart} from "../../flowchart/models";
 
 @Service()
 export class WorkflowDefinitionsApi {
@@ -49,12 +50,12 @@ export class WorkflowDefinitionsApi {
     //TODO: Written as a workaround for different server and client models.
     //To be deleted after the port model on backend is updated.
     const requestClone = cloneDeep(request);
-    removeGuidsFromPortNames(requestClone.model.root);
+    removeGuidsFromPortNames(requestClone.model.root as Flowchart);
 
     const httpClient = await this.getHttpClient();
     const response = await httpClient.post<WorkflowDefinition>('workflow-definitions', requestClone);
 
-    addGuidsToPortNames(response.data.root);
+    addGuidsToPortNames(response.data.root as Flowchart);
     return response.data;
   }
 

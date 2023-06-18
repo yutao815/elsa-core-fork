@@ -1,6 +1,6 @@
 import {Edge, Graph, Node} from "@antv/x6";
 import {PortManager} from "@antv/x6/lib/model/port";
-import {Connection} from "../modules/flowchart/models";
+import {Connection, Flowchart} from "../modules/flowchart/models";
 import {v4 as uuid} from 'uuid';
 import {Activity} from "../models";
 import optionsStore from '../data/designer-options-store';
@@ -241,28 +241,32 @@ export function createEdge(connection: Connection): Edge.Metadata {
   };
 }
 
-export function removeGuidsFromPortNames(root: Activity) {
+export function removeGuidsFromPortNames(root: Flowchart) {
   if (root.connections?.length > 0) {
-    root.connections.forEach((connection: { sourcePort: string; targetPort: string; }) => {
-      connection.sourcePort = getPortNameByPortId(connection.sourcePort);
-      connection.targetPort = getPortNameByPortId(connection.targetPort);
+    root.connections.forEach((connection: Connection) => {
+      connection.source.port = getPortNameByPortId(connection.source.port);
+      connection.target.port = getPortNameByPortId(connection.target.port);
     });
   }
-  let activitiesWithConnections = root.activities?.filter(act => act.body?.connections?.length > 0);
-  activitiesWithConnections.forEach(activity => {
+
+  // TODO: this is a shortcut which only works for activities that have a "body" property that is set to a flowchart (or an activity with a "connections" property).
+  let activitiesWithConnections = root.activities?.filter((act: any) => act.body?.connections?.length > 0);
+  activitiesWithConnections.forEach((activity: any) => {
     removeGuidsFromPortNames(activity.body);
   });
 }
 
-export function addGuidsToPortNames(root: Activity) {
+export function addGuidsToPortNames(root: Flowchart) {
   if (root.connections.length > 0) {
-    root.connections.forEach((connection: { sourcePort: string; targetPort: string; }) => {
-      connection.sourcePort = uuid() + '_' + connection.sourcePort;
-      connection.targetPort = uuid() + '_' + connection.targetPort;
+    root.connections.forEach((connection: Connection) => {
+      connection.source.port = uuid() + '_' + connection.source.port;
+      connection.target.port = uuid() + '_' + connection.target.port;
     });
   }
-  let activitiesWithConnections = root.activities?.filter(act => act.body?.connections?.length > 0);
-  activitiesWithConnections.forEach(activity => {
+
+  // TODO: this is a shortcut which only works for activities that have a "body" property that is set to a flowchart (or an activity with a "connections" property).
+  let activitiesWithConnections = root.activities?.filter((act: any) => act.body?.connections?.length > 0);
+  activitiesWithConnections.forEach((activity: any) => {
     addGuidsToPortNames(activity.body);
   });
 }

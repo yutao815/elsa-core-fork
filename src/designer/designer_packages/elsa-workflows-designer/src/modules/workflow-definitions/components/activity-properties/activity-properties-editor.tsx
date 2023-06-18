@@ -255,10 +255,10 @@ export class ActivityPropertiesEditor {
       }
 
       input.expression = expression;
-      activity[camelCasePropertyName] = input;
+      activity.inputs[camelCasePropertyName] = input;
 
     } else {
-      activity[camelCasePropertyName] = propertyValue;
+      activity.inputs[camelCasePropertyName] = propertyValue;
     }
     this.updateActivity(propertyName);
   }
@@ -277,7 +277,7 @@ export class ActivityPropertiesEditor {
       }
     }
 
-    activity[camelCasePropertyName] = property;
+    activity.outputs[camelCasePropertyName] = property;
 
     this.updateActivity(propertyName);
   }

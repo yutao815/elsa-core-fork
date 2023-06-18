@@ -1,8 +1,10 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Elsa.Expressions.Contracts;
 using Elsa.Expressions.Helpers;
 using Elsa.Expressions.Models;
+using Elsa.Extensions;
 using Elsa.Workflows.Core.Activities;
 using Elsa.Workflows.Core.Contracts;
 using Elsa.Workflows.Core.Helpers;
@@ -71,45 +73,52 @@ public class ActivityJsonConverter : JsonConverter<IActivity>
 
         var context = new ActivityConstructorContext(activityRoot, newOptions);
         var activity = activityDescriptor.Constructor(context);
+        var activityInputs = activityRoot.TryGetProperty("inputs", out var inputsElement) ? inputsElement : default;
 
-        // Reconstruct synthetic inputs.
-        foreach (var inputDescriptor in activityDescriptor.Inputs.Where(x => x.IsSynthetic))
+        // Reconstruct inputs.
+        foreach (var inputDescriptor in activityDescriptor.Inputs)
         {
             var inputName = inputDescriptor.Name;
             var propertyName = inputName.Camelize();
             var nakedType = inputDescriptor.Type;
             var wrappedType = typeof(Input<>).MakeGenericType(nakedType);
 
-            if (!activityRoot.TryGetProperty(propertyName, out var propertyElement) || propertyElement.ValueKind == JsonValueKind.Null || propertyElement.ValueKind == JsonValueKind.Undefined) 
-                continue;
+            if(!activityInputs.TryGetPropertySafe(propertyName, out var inputElement) || inputElement.ValueKind == JsonValueKind.Null || inputElement.ValueKind == JsonValueKind.Undefined)
+                // Backwards compatibility with original JSON structure with same-level inputs property.
+                if (!activityRoot.TryGetPropertySafe(propertyName, out inputElement) || inputElement.ValueKind == JsonValueKind.Null || inputElement.ValueKind == JsonValueKind.Undefined) 
+                    continue;
             
-            var isWrapped = propertyElement.ValueKind == JsonValueKind.Object && propertyElement.GetProperty("typeName").ValueKind != JsonValueKind.Undefined;
+            var isWrapped = inputElement.ValueKind == JsonValueKind.Object && inputElement.GetProperty("typeName").ValueKind != JsonValueKind.Undefined;
 
             if (isWrapped)
             {
-                var json = propertyElement.ToString();
+                var json = inputElement.ToString();
                 var inputValue = JsonSerializer.Deserialize(json, wrappedType, newOptions);
 
                 activity.SyntheticProperties[inputName] = inputValue!;
             }
             else
             {
-                activity.SyntheticProperties[inputName] = propertyElement.ConvertTo(inputDescriptor.Type)!;
+                activity.SyntheticProperties[inputName] = inputElement.ConvertTo(inputDescriptor.Type)!;
             }
         }
 
-        // Reconstruct synthetic outputs.
-        foreach (var outputDescriptor in activityDescriptor.Outputs.Where(x => x.IsSynthetic))
+        // Reconstruct outputs.
+        var activityOutputs = activityRoot.TryGetProperty("outputs", out var outputsElement) ? inputsElement : default;
+        
+        foreach (var outputDescriptor in activityDescriptor.Outputs)
         {
             var outputName = outputDescriptor.Name;
             var propertyName = outputName.Camelize();
             var nakedType = outputDescriptor.Type;
             var wrappedType = typeof(Output<>).MakeGenericType(nakedType);
 
-            if (!activityRoot.TryGetProperty(propertyName, out var propertyElement) || propertyElement.ValueKind == JsonValueKind.Null || propertyElement.ValueKind == JsonValueKind.Undefined)
-                continue;
+            if (!activityOutputs.TryGetProperty(propertyName, out var outputElement) || outputElement.ValueKind == JsonValueKind.Null || outputElement.ValueKind == JsonValueKind.Undefined)
+                // Backwards compatibility with original JSON structure with same-level outputs property.
+                if (!activityRoot.TryGetProperty(propertyName, out outputElement) || outputElement.ValueKind == JsonValueKind.Null || outputElement.ValueKind == JsonValueKind.Undefined)
+                    continue;
 
-            var memoryReferenceElement = propertyElement.GetProperty("memoryReference");
+            var memoryReferenceElement = outputElement.GetProperty("memoryReference");
 
             if (!memoryReferenceElement.TryGetProperty("id", out var memoryReferenceIdElement))
                 continue;
@@ -141,6 +150,11 @@ public class ActivityJsonConverter : JsonConverter<IActivity>
         var activityModel = JsonSerializer.SerializeToNode(value, value.GetType(), newOptions)!;
         var syntheticInputs = activityDescriptor.Inputs.Where(x => x.IsSynthetic).ToList();
         var syntheticOutputs = activityDescriptor.Outputs.Where(x => x.IsSynthetic).ToList();
+        var inputsElement = new JsonObject();
+        var outputsElement = new JsonObject();
+
+        activityModel["inputs"] = inputsElement;
+        activityModel["outputs"] = outputsElement;
 
         // Write synthetic inputs. 
         foreach (var inputDescriptor in syntheticInputs)
@@ -155,7 +169,7 @@ public class ActivityJsonConverter : JsonConverter<IActivity>
 
             if (input == null)
             {
-                activityModel[propertyName] = null;
+                inputsElement[propertyName] = null;
                 continue;
             }
 
@@ -178,7 +192,7 @@ public class ActivityJsonConverter : JsonConverter<IActivity>
                 }
             };
 
-            activityModel[propertyName] = JsonSerializer.SerializeToNode(inputModel, inputModel.GetType(), newOptions);
+            inputsElement[propertyName] = JsonSerializer.SerializeToNode(inputModel, inputModel.GetType(), newOptions);
         }
 
         // Write synthetic outputs. 
@@ -194,7 +208,7 @@ public class ActivityJsonConverter : JsonConverter<IActivity>
 
             if (output == null)
             {
-                activityModel[propertyName] = null;
+                outputsElement[propertyName] = null;
                 continue;
             }
 
@@ -210,7 +224,7 @@ public class ActivityJsonConverter : JsonConverter<IActivity>
                 }
             };
 
-            activityModel[propertyName] = JsonSerializer.SerializeToNode(outputModel, outputModel.GetType(), newOptions);
+            outputsElement[propertyName] = JsonSerializer.SerializeToNode(outputModel, outputModel.GetType(), newOptions);
         }
 
         // Send the model to the writer.

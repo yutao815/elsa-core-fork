@@ -18,8 +18,9 @@ export interface Activity {
   canStartWorkflow?: boolean;
   runAsynchronously?: boolean;
   customProperties: any;
-
-  [name: string]: any;
+  inputs: any;
+  outputs: any;
+  //[name: string]: any;
 }
 
 export interface Trigger extends Activity {
