@@ -23,7 +23,7 @@ namespace Elsa.ProtoActor.Services;
 /// <summary>
 /// A Proto.Actor implementation of <see cref="IWorkflowRuntime"/>.
 /// </summary>
-public class ProtoActorWorkflowRuntime : IWorkflowRuntime
+internal class ProtoActorWorkflowRuntime : IWorkflowRuntime
 {
     private readonly Cluster _cluster;
     private readonly IWorkflowStateSerializer _workflowStateSerializer;

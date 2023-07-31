@@ -12,6 +12,7 @@ using Elsa.Http.Options;
 using Elsa.Http.Parsers;
 using Elsa.Http.PortResolvers;
 using Elsa.Http.Providers;
+using Elsa.Http.Selectors;
 using Elsa.Http.Services;
 using Elsa.JavaScript.Features;
 using Elsa.Liquid.Features;
@@ -61,6 +62,26 @@ public class HttpFeature : FeatureBase
     /// A delegate to configure the <see cref="HttpClientBuilder"/> for <see cref="HttpClient"/>.
     /// </summary>
     public Action<IHttpClientBuilder> HttpClientBuilder { get; set; } = _ => { };
+
+    /// <summary>
+    /// A delegate to register workflow instance ID selectors.
+    /// </summary>
+    public Action<IServiceCollection> RegisterWorkflowInstanceSelectors = services =>
+    {
+        services
+            .AddSingleton<IWorkflowInstanceIdSelector, HeadersWorkflowInstanceIdSelector>()
+            .AddSingleton<IWorkflowInstanceIdSelector, QueryStringWorkflowInstanceIdSelector>();
+    };
+    
+    /// <summary>
+    /// A delegate to register correlation ID selectors.
+    /// </summary>
+    public Action<IServiceCollection> RegisterCorrelationIdSelectors = services =>
+    {
+        services
+            .AddSingleton<ICorrelationIdSelector, HeadersCorrelationIdSelector>()
+            .AddSingleton<ICorrelationIdSelector, QueryStringCorrelationIdSelector>();
+    };
 
     /// <inheritdoc />
     public override void Configure()
@@ -141,5 +162,11 @@ public class HttpFeature : FeatureBase
             // AuthenticationBasedHttpEndpointAuthorizationHandler requires Authorization services.
             // We could consider creating a separate module for installing authorization services.
             .AddAuthorization();
+        
+        // Register workflow instance ID selectors.
+        RegisterWorkflowInstanceSelectors(Services);
+        
+        // Register correlation ID selectors.
+        RegisterCorrelationIdSelectors(Services);
     }
 }

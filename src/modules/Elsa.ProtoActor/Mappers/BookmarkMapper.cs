@@ -8,45 +8,52 @@ namespace Elsa.ProtoActor.Mappers;
 /// <summary>
 /// Maps between <see cref="Bookmark"/> and <see cref="ProtoBookmark"/>.
 /// </summary>
-public class BookmarkMapper
+internal class BookmarkMapper
 {
     private readonly IBookmarkPayloadSerializer _bookmarkPayloadSerializer;
 
-    /// <summary>
-    /// Initializes a new instance of <see cref="BookmarkMapper"/>.
-    /// </summary>
     public BookmarkMapper(IBookmarkPayloadSerializer bookmarkPayloadSerializer)
     {
         _bookmarkPayloadSerializer = bookmarkPayloadSerializer;
     }
-    
-    public Bookmark Map(ProtoBookmark bookmark) =>
-        new(bookmark.Id, bookmark.Name, bookmark.Hash, bookmark.Payload, bookmark.ActivityNodeId, bookmark.ActivityInstanceId, bookmark.AutoBurn, bookmark.CallbackMethodName);
 
-    
-    public IEnumerable<ProtoBookmark> Map(IEnumerable<Bookmark> source) =>   
-        source.Select(x =>
-            new ProtoBookmark
+    public Bookmark Map(ProtoBookmark bookmark) => new(bookmark.Id, bookmark.Name, bookmark.Hash, bookmark.Payload, bookmark.ActivityNodeId, bookmark.ActivityInstanceId, bookmark.AutoBurn, bookmark.CallbackMethodName);
+
+    public IEnumerable<ProtoBookmark> Map(IEnumerable<Bookmark> source)
+    {
+        return source.Select(x =>
+        {
+            var payload = x.Payload != null ? _bookmarkPayloadSerializer.Serialize<object>(x.Payload) : string.Empty;
+            
+            return new ProtoBookmark
             {
                 Id = x.Id,
                 Name = x.Name,
                 Hash = x.Hash,
-                Payload = x.Payload != null ? _bookmarkPayloadSerializer.Serialize(x.Payload) : string.Empty,
+                Payload = payload,
                 ActivityNodeId = x.ActivityNodeId,
                 ActivityInstanceId = x.ActivityInstanceId,
                 AutoBurn = x.AutoBurn,
                 CallbackMethodName = x.CallbackMethodName.EmptyIfNull()
-            });
-    
-    public IEnumerable<Bookmark> Map(IEnumerable<ProtoBookmark> source) =>
-        source.Select(x =>
-            new Bookmark(
+            };
+        });
+    }
+
+    public IEnumerable<Bookmark> Map(IEnumerable<ProtoBookmark> source)
+    {
+        return source.Select(x =>
+        {
+            var payload = !string.IsNullOrEmpty(x.Payload) ? _bookmarkPayloadSerializer.Deserialize(x.Payload) : null;
+
+            return new Bookmark(
                 x.Id,
                 x.Name,
                 x.Hash,
-                x.Payload.NullIfEmpty(),
+                payload,
                 x.ActivityNodeId,
                 x.ActivityInstanceId,
                 x.AutoBurn,
-                x.CallbackMethodName.NullIfEmpty()));
+                x.CallbackMethodName.NullIfEmpty());
+        });
+    }
 }

@@ -137,11 +137,11 @@ public class HttpEndpoint : Trigger<HttpRequest>
     private IEnumerable<object> GetBookmarkPayloads(ExpressionExecutionContext context)
     {
         // Generate bookmark data for path and selected methods.
-        var path = context.Get(Path);
+        var path = Path.Get(context);
         var methods = SupportedMethods.GetOrDefault(context) ?? new List<string>{ HttpMethods.Get };
         var authorize = Authorize.GetOrDefault(context);
         var policy = Policy.GetOrDefault(context);
-        return methods!.Select(x =>
+        return methods.Select(x =>
             new HttpEndpointBookmarkPayload(path!, x.ToLowerInvariant(), authorize, policy))
             .Cast<object>().ToArray();
     }
